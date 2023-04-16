@@ -1,47 +1,58 @@
-# python3
+class Contact:
+    def __init__(self, number, name):
+        self.number = number
+        self.name = name
 
-class Query:
-    def __init__(self, query):
-        self.type = query[0]
-        self.number = int(query[1])
-        if self.type == 'add':
-            self.name = query[2]
+class PhoneBook:
+    def __init__(self):
+        self.contacts = {}
+        
+    def add_contact(self, number, name):
+        if len(str(number)) <= 7 and len(str(name)) <= 15:
+            zero = list(str(number))
+            if int(zero[0]) != "0":
+                 self.contacts[number] = Contact(number, name)
+        else:
+            print("input error")
+            return
+      
+    def remove_contact(self, number):
+        if number in self.contacts:
+            del self.contacts[number]
+
+    def find_contact(self, number):
+        if number in self.contacts:
+            return self.contacts[number].name
+        else:
+            return "not found"
 
 def read_queries():
     n = int(input())
-    return [Query(input().split()) for i in range(n)]
+    queries = []
+    if 0 <= n <= 100000:
+        for i in range(n):
+            query = input().split()
+            queries.append((query[0], int(query[1]), query[2] if len(query) == 3 else None))
+        return queries
+    else:
+        print("input error")
+        return
 
 def write_responses(result):
-    print('\n'.join(result))
+    for r in result:
+        print(r)
 
 def process_queries(queries):
     result = []
-    # Keep list of all existing (i.e. not deleted yet) contacts.
-    contacts = []
-    for cur_query in queries:
-        if cur_query.type == 'add':
-            # if we already have contact with such number,
-            # we should rewrite contact's name
-            for contact in contacts:
-                if contact.number == cur_query.number:
-                    contact.name = cur_query.name
-                    break
-            else: # otherwise, just add it
-                contacts.append(cur_query)
-        elif cur_query.type == 'del':
-            for j in range(len(contacts)):
-                if contacts[j].number == cur_query.number:
-                    contacts.pop(j)
-                    break
+    phonebook = PhoneBook()
+    for query in queries:
+        if query[0] == 'add':
+            phonebook.add_contact(query[1], query[2])
+        elif query[0] == 'del':
+            phonebook.remove_contact(query[1])
         else:
-            response = 'not found'
-            for contact in contacts:
-                if contact.number == cur_query.number:
-                    response = contact.name
-                    break
-            result.append(response)
+            result.append(phonebook.find_contact(query[1]))
     return result
 
 if __name__ == '__main__':
     write_responses(process_queries(read_queries()))
-
